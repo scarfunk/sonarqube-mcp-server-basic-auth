@@ -133,7 +133,7 @@ class HttpClientAdapter implements HttpClient {
   private CompletableFuture<Response> executeAsync(SimpleHttpRequest httpRequest, @Nullable String tokenToUse) {
     try {
       if (tokenToUse != null) {
-        httpRequest.setHeader(AUTHORIZATION_HEADER, bearer(tokenToUse));
+        httpRequest.setHeader(AUTHORIZATION_HEADER, basicAuth(tokenToUse));
       }
       return new CompletableFutureWrappingFuture(httpRequest);
     } catch (Exception e) {
@@ -141,8 +141,10 @@ class HttpClientAdapter implements HttpClient {
     }
   }
 
-  private static String bearer(String token) {
-    return String.format("Bearer %s", token);
+  private static String basicAuth(String token) {
+    String credentials = token + ":";
+    String encoded = java.util.Base64.getEncoder().encodeToString(credentials.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    return String.format("Basic %s", encoded);
   }
 
 }
